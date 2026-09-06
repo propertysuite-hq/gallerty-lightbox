@@ -1,0 +1,122 @@
+{{/*
+  Gallery & Lightbox — consolidated partial
+  ------------------------------------------
+  Renders a set of page-bundle images as either a responsive grid or a
+  Swiper carousel, with an optional Fancybox lightbox on click.
+
+  Params (pass as a dict):
+    images          [required] list of { filename, caption, alt }, matching
+                    a Hugo front matter list — filenames resolve against
+                    the page's own resource bundle by default.
+    page            [required] the current Page (`.` in most templates)
+    resources       [optional] override which resources to search
+                    (defaults to page.Resources)
+    layout          "grid" (default) or "carousel"
+    columns         grid columns at desktop width (default 3)
+    thumbWidth      grid thumbnail width in px (default 260)
+    disableLightbox set true to render images without a lightbox
+    groupID         lightbox gallery group id (defaults to a slug of the
+                    page title, so multiple galleries on one site don't
+                    cross-cycle)
+
+  Requires (see assets.html in this same folder for the exact tags):
+    - Fancybox CSS + JS (for the lightbox, both layouts)
+    - Swiper CSS + JS (only if layout = "carousel")
+*/}}
+
+{{- $images := .images -}}
+{{- $page := .page -}}
+{{- $resources := .resources | default $page.Resources -}}
+{{- $layout := .layout | default "grid" -}}
+{{- $columns := .columns | default 3 -}}
+{{- $thumbWidth := .thumbWidth | default 260 -}}
+{{- $disableLightbox := .disableLightbox | default false -}}
+{{- $lightbox := not $disableLightbox -}}
+{{- $groupID := .groupID | default (printf "gallery-%s" ($page.Title | urlize)) -}}
+
+{{- if $images }}
+
+{{- if eq $layout "carousel" }}
+<div class="gl-carousel swiper" data-gl-group="{{ $groupID }}">
+  <div class="swiper-wrapper">
+    {{- range $images }}
+    {{- $img := $resources.GetMatch .filename }}
+    {{- if $img }}
+    {{- $slide := $img.Resize "1000x" }}
+    <div class="swiper-slide">
+      {{- if $lightbox }}
+      <a href="{{ $slide.RelPermalink }}" data-fancybox="{{ $groupID }}" {{ with .caption }}data-caption="{{ . }}"{{ end }}>
+        <img src="{{ $slide.RelPermalink }}" alt="{{ .alt }}" loading="lazy" />
+      </a>
+      {{- else }}
+      <img src="{{ $slide.RelPermalink }}" alt="{{ .alt }}" loading="lazy" />
+      {{- end }}
+      {{- with .caption }}<div class="gl-caption">{{ . }}</div>{{ end }}
+    </div>
+    {{- else }}
+    <div class="swiper-slide gl-missing">Image not found: {{ .filename }}</div>
+    {{- end }}
+    {{- end }}
+  </div>
+  <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-pagination"></div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  new Swiper('[data-gl-group="{{ $groupID }}"]', {
+    loop: true,
+    slidesPerView: 1,
+    spaceBetween: 20,
+    navigation: {
+      nextEl: '[data-gl-group="{{ $groupID }}"] .swiper-button-next',
+      prevEl: '[data-gl-group="{{ $groupID }}"] .swiper-button-prev',
+    },
+    pagination: {
+      el: '[data-gl-group="{{ $groupID }}"] .swiper-pagination',
+      clickable: true,
+    },
+    breakpoints: {
+      640: { slidesPerView: 1 },
+      1024: { slidesPerView: 2 },
+      1280: { slidesPerView: {{ $columns }} }
+    }
+  });
+  {{- if $lightbox }}
+  if (window.Fancybox) { Fancybox.bind('[data-fancybox="{{ $groupID }}"]'); }
+  {{- end }}
+});
+</script>
+
+{{- else }}
+<div class="gl-grid" style="--gl-columns: {{ $columns }}; --gl-thumb-width: {{ $thumbWidth }}px;">
+  {{- range $images }}
+  {{- $img := $resources.GetMatch .filename }}
+  {{- if $img }}
+  {{- $thumb := $img.Fill (printf "%dx%d" $thumbWidth (int (mul $thumbWidth 0.75))) }}
+  {{- $full := $img.Resize "1600x" }}
+  <figure class="gl-item">
+    {{- if $lightbox }}
+    <a href="{{ $full.RelPermalink }}" data-fancybox="{{ $groupID }}" {{ with .caption }}data-caption="{{ . }}"{{ end }}>
+      <img src="{{ $thumb.RelPermalink }}" alt="{{ .alt }}" loading="lazy" class="gl-thumb" />
+    </a>
+    {{- else }}
+    <img src="{{ $thumb.RelPermalink }}" alt="{{ .alt }}" loading="lazy" class="gl-thumb" />
+    {{- end }}
+    {{- with .caption }}<figcaption>{{ . }}</figcaption>{{ end }}
+  </figure>
+  {{- else }}
+  <p class="gl-missing">Image not found: {{ .filename }}</p>
+  {{- end }}
+  {{- end }}
+</div>
+{{- if $lightbox }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.Fancybox) { Fancybox.bind('[data-fancybox="{{ $groupID }}"]'); }
+});
+</script>
+{{- end }}
+{{- end }}
+
+{{- end }}

@@ -1,0 +1,61 @@
+/* Gallery & Lightbox — standalone stylesheet
+   Grid layout is fully self-contained. Carousel layout relies on
+   Swiper's own bundled CSS (see assets.html) — these rules just adjust
+   its default look to match the grid's visual style. */
+
+.gl-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--gl-columns, 3), 1fr);
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.gl-item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gl-item .gl-thumb {
+  width: 100%;
+  max-width: var(--gl-thumb-width, 260px);
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.gl-item figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.95em;
+  text-align: center;
+}
+
+.gl-missing {
+  font-size: 0.85em;
+  color: #a33;
+  border: 1px dashed #a33;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .gl-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Carousel tweaks */
+.gl-carousel .swiper-slide img {
+  border-radius: 6px;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.gl-carousel .gl-caption {
+  margin-top: 0.5rem;
+  font-size: 0.9em;
+  text-align: center;
+}

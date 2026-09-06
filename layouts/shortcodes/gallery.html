@@ -1,0 +1,32 @@
+{{/*
+  Shortcode usage (in a page's Markdown content):
+
+    {{< gallery layout="grid" columns="3" >}}
+    - filename: photo1.jpg
+      caption: "Living room"
+      alt: "Living room with large window"
+    - filename: photo2.jpg
+      caption: "Kitchen"
+      alt: "Kitchen with island"
+    {{< /gallery >}}
+
+  The inner content must be valid YAML (a list of image entries), same
+  shape as the `images` param the partial expects. Filenames resolve
+  against this page's own resource bundle (page bundle images placed
+  alongside index.md).
+*/}}
+
+{{- $images := .Inner | transform.Unmarshal -}}
+{{- $layout := .Get "layout" | default "grid" -}}
+{{- $columns := .Get "columns" | default 3 -}}
+{{- $thumbWidth := .Get "thumbWidth" | default 260 -}}
+{{- $disableLightbox := eq (.Get "disableLightbox") "true" -}}
+
+{{ partial "gallery.html" (dict
+  "images" $images
+  "page" .Page
+  "layout" $layout
+  "columns" (int $columns)
+  "thumbWidth" (int $thumbWidth)
+  "disableLightbox" $disableLightbox
+) }}
