@@ -6,7 +6,7 @@ lightbox) or a **carousel** (Swiper-powered slider, with or without the
 lightbox on click). Not tied to any particular theme or content type —
 drop it into any Hugo site with page-bundle images.
 
-Originally extracted from the [Apartments Hugo theme](https://propertysuitehq.com/themes/apartments),
+Originally extracted from the [Apartments Hugo theme](https://apartments.propertysuitehq.com/),
 where it powers floorplan and photo galleries — but there's nothing
 apartment-specific about it.
 
@@ -15,11 +15,19 @@ apartment-specific about it.
 1. Copy `layouts/_partials/gallery.html` and `layouts/shortcodes/gallery.html`
    into your site's own `layouts/` folder (or your theme's, if you're
    building one).
-2. Copy `static/css/gallery.css` into your site's `static/css/`, and add
-   `<link rel="stylesheet" href="/css/gallery.css">` to your `<head>`.
+2. Copy `static/css/gallery.css` into your site's `static/css/` and include
+   it in your site using a Hugo-safe URL, for example:
+
+   ```go-html-template
+   <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}" />
+   ```
+
 3. Add the Fancybox (and, if you want carousels, Swiper) CDN tags from
    `layouts/_partials/assets.html` to your site's head/footer partials —
    that file is documentation, not something you call with `partial`.
+
+The component uses Hugo page resources, so the simplest setup is to keep
+gallery images in the page bundle alongside its `index.md`.
 
 ## Usage
 
@@ -62,7 +70,13 @@ gallery:
 {{</* /gallery */>}}
 ```
 
+The shortcode uses the current page's resources. For advanced cases such
+as shared resources or multiple galleries that need custom lightbox group
+IDs, use the partial directly.
+
 ## Params
+
+The following parameters apply to the `gallery.html` partial:
 
 | Param | Default | Notes |
 |---|---|---|
@@ -74,6 +88,10 @@ gallery:
 | `thumbWidth` | `260` | Grid thumbnail width in px |
 | `disableLightbox` | `false` | Set `true` to skip the lightbox entirely |
 | `groupID` | slug of page title | Keeps multiple galleries on one page from cross-cycling in the lightbox |
+
+The shortcode currently exposes `layout`, `columns`, `thumbWidth`, and
+`disableLightbox` as shortcode parameters; its image list comes from the
+shortcode body and its resources come from the current page.
 
 ## Requirements
 
